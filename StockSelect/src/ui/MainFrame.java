@@ -26,12 +26,25 @@ import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Button;
 
 public class MainFrame {
+	
+	private static final Image CLOSE = 
+			new Image(Display.getDefault(), "icons/close_btn.png");
+	private static final Image CLOSE_HOVER = 
+			new Image(Display.getDefault(), "icons/close_btn_active.png");
+	private static final Image MIN = 
+			new Image(Display.getDefault(), "icons/mini_btn.png");
+	private static final Image MIN_HOVER = 
+			new Image(Display.getDefault(), "icons/mini_btn_active.png");
+	private static final Image REFRESH = 
+			new Image(Display.getDefault(), "icons/refresh.png");
+	
 
 	private static final String[] HEADER = new String[] { "序号", "股票代码", "股票简称",
 			"涨跌幅(%)", "现价(元)", "市盈率(pe)", "动态市盈率", "市净率" };
@@ -42,6 +55,8 @@ public class MainFrame {
 
 	protected Shell shell;
 	private Composite topComposite;
+	
+	private Label btnRefresh;
 
 	private Composite optionComposite;
 	private Composite selectComposite;
@@ -55,7 +70,13 @@ public class MainFrame {
 	private CLabel lblCollect;
 
 	private Composite stockListComposite;
+	private CLabel lblResultCount;
 	private Table stockListTable;
+	private FormData fd_optionComposite;
+	private CLabel lblNewLabel;
+	private Label lblNewLabel_1;
+	private Label btnClose;
+	private Label btnMin;
 
 	/**
 	 * Launch the application.
@@ -81,14 +102,12 @@ public class MainFrame {
 		shell.open();
 		shell.layout();
 		
+		createIcon();
+		
 		CompositeMove();
 		
-//		setCompositeMove();
-//		while (!shell.isDisposed()) {
-//			if (!display.readAndDispatch()) {
-//				display.sleep();
-//			}
-//		}
+		
+
 	}
 	
 	public void eventLoop(Display display) {
@@ -97,6 +116,52 @@ public class MainFrame {
 				display.sleep();
 			}
 		}
+	}
+	
+	public void createIcon(){
+		btnRefresh = new Label(topComposite, SWT.NONE);
+		btnRefresh.setToolTipText("刷新");
+		btnRefresh.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+		FormData fd_btnRefresh = new FormData();
+		fd_btnRefresh.top = new FormAttachment(optionComposite, 5, SWT.TOP);
+		fd_btnRefresh.bottom = new FormAttachment(lblResultCount, 0, SWT.BOTTOM);
+		fd_btnRefresh.right = new FormAttachment(100, -24);
+		fd_btnRefresh.left = new FormAttachment(100, -48);
+		btnRefresh.setLayoutData(fd_btnRefresh);
+		btnRefresh.setText("刷新");
+		btnRefresh.setImage(REFRESH);
+		btnRefresh.setVisible(true);
+		btnRefresh.addMouseTrackListener(new RefreshListerner());
+		btnRefresh.addMouseListener(new RefreshListerner());
+		
+		btnClose = new Label(topComposite, SWT.NONE);
+		btnClose.setToolTipText("关闭");
+		FormData fd_btnClose = new FormData();
+		fd_btnClose.top = new FormAttachment(0);
+		fd_btnClose.right = new FormAttachment(100);
+		fd_btnClose.bottom = new FormAttachment(0, 24);
+		fd_btnClose.left = new FormAttachment(100, -24);
+		btnClose.setLayoutData(fd_btnClose);
+		btnClose.setText("关闭");
+		btnClose.setImage(CLOSE);
+		btnClose.addMouseTrackListener(new CloseListerner(shell));
+		btnClose.addMouseListener(new CloseListerner(shell));
+
+		btnMin = new Label(topComposite, SWT.NONE);
+		btnMin.setToolTipText("最小化窗口");
+		FormData fd_btnMin = new FormData();
+		fd_btnMin.bottom = new FormAttachment(btnRefresh, -12);
+		fd_btnMin.top = new FormAttachment(btnClose, 0, SWT.TOP);
+		fd_btnMin.left = new FormAttachment(btnClose, -39, SWT.LEFT);
+		fd_btnMin.right = new FormAttachment(btnClose, -15);
+		btnMin.setLayoutData(fd_btnMin);
+		btnMin.setText("最小化");
+		btnMin.setImage(MIN);
+		btnMin.addMouseTrackListener(new MinListerner(shell));
+		btnMin.addMouseListener(new MinListerner(shell));
+		
+		
+		
 	}
 
 	//设置按下鼠标可移动窗口
@@ -125,27 +190,26 @@ public class MainFrame {
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.NO_TRIM);
-		shell.setSize(993, 557);
+		shell.setSize(993, 580);
 		shell.setText("SWT Application");
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		topComposite = new Composite(shell, SWT.NONE);
-		topComposite.setBackground(SWTResourceManager
-				.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+		topComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
 		topComposite.setLayout(new FormLayout());
 
 		createOptionComposite();
 
 		createStockListComposite();
-
+		createIcon();
 	}
 
 	public void createOptionComposite() {
 		optionComposite = new Composite(topComposite, SWT.NONE);
-		FormData fd_optionComposite = new FormData();
-		fd_optionComposite.bottom = new FormAttachment(0, 544);
+		fd_optionComposite = new FormData();
+		fd_optionComposite.top = new FormAttachment(0, 30);
+		fd_optionComposite.bottom = new FormAttachment(100, -10);
 		fd_optionComposite.right = new FormAttachment(0, 331);
-		fd_optionComposite.top = new FormAttachment(0, 34);
 		fd_optionComposite.left = new FormAttachment(0, 10);
 		optionComposite.setLayoutData(fd_optionComposite);
 		optionComposite.setBackground(SWTResourceManager
@@ -177,7 +241,7 @@ public class MainFrame {
 
 		createConditionTable();
 		
-		operation();
+//		operation();
 	}
 	
 	public void createConditionTable() {
@@ -278,7 +342,7 @@ public class MainFrame {
 	public void createCollectComposite() {
 		collectComposite = new Composite(optionComposite, SWT.NONE);
 		collectComposite.setLocation(0, 232);
-		collectComposite.setSize(321, 278);
+		collectComposite.setSize(321, 308);
 		collectComposite.setBackground(SWTResourceManager
 				.getColor(SWT.COLOR_WHITE));
 
@@ -295,7 +359,7 @@ public class MainFrame {
 	}
 	
 	public void createCollectCondition(){
-		for(int i = 0; i < 7; ++i){
+		for(int i = 0; i < 8; ++i){
 			CollectCondition cc = new CollectCondition(collectComposite);
 			cc.setSize(321, 30);
 			cc.setLocation(0, 35 * (i+1));
@@ -306,22 +370,43 @@ public class MainFrame {
 	}
 
 	public void createStockListComposite() {
+		lblResultCount = new CLabel(topComposite, SWT.NONE);
+		lblResultCount.setFont(SWTResourceManager.getFont("Microsoft YaHei UI", 12, SWT.BOLD));
+		lblResultCount.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+		FormData fd_lblResultCount = new FormData();
+		fd_lblResultCount.right = new FormAttachment(optionComposite, 273, SWT.RIGHT);
+		fd_lblResultCount.top = new FormAttachment(optionComposite, 0, SWT.TOP);
+		fd_lblResultCount.left = new FormAttachment(optionComposite, 6);
+		lblResultCount.setLayoutData(fd_lblResultCount);
+		lblResultCount.setText("共有3700股符合条件");
+		
+//		lblNewLabel = new CLabel(topComposite, SWT.NONE);
+//		FormData fd_lblNewLabel = new FormData();
+//		fd_lblNewLabel.top = new FormAttachment(optionComposite, 0, SWT.TOP);
+//		fd_lblNewLabel.left = new FormAttachment(optionComposite, 6);
+//		lblNewLabel.setLayoutData(fd_lblNewLabel);
+//		lblNewLabel.setText("New Label");
+		
 		stockListComposite = new Composite(topComposite, SWT.NONE);
 		FormData fd_stockListComposite = new FormData();
-		fd_stockListComposite.bottom = new FormAttachment(0, 544);
+		fd_stockListComposite.top = new FormAttachment(0, 61);
+		fd_stockListComposite.bottom = new FormAttachment(100, -10);
 		fd_stockListComposite.right = new FormAttachment(0, 983);
-		fd_stockListComposite.top = new FormAttachment(0, 34);
 		fd_stockListComposite.left = new FormAttachment(0, 337);
 		stockListComposite.setLayoutData(fd_stockListComposite);
 		stockListComposite.setBackground(SWTResourceManager
 				.getColor(SWT.COLOR_WHITE));
 		stockListComposite.setLayout(new FillLayout(SWT.HORIZONTAL));
-
+		
+		System.out.println(stockListComposite.getBounds());
+		
+//		stockListTable = new StockListTable(stockListComposite);
+		
 		stockListTable = new Table(stockListComposite, SWT.BORDER
 				| SWT.FULL_SELECTION);
 		stockListTable.setHeaderVisible(true);
 		stockListTable.setLinesVisible(true);
-
+		System.out.println(stockListTable.getBounds());
 		for (int i = 0; i < HEADER.length; ++i) {
 			TableColumn tblclmnNewColumn = new TableColumn(stockListTable,
 					SWT.CENTER);
@@ -335,7 +420,19 @@ public class MainFrame {
 		}
 
 		TableCursor tableCursor = new TableCursor(stockListTable, SWT.BORDER);
-
+		
+//		lblNewLabel_1 = new Label(topComposite, SWT.NONE);
+//		FormData fd_lblNewLabel_1 = new FormData();
+//		fd_lblNewLabel_1.top = new FormAttachment(optionComposite, 0, SWT.TOP);
+//		fd_lblNewLabel_1.right = new FormAttachment(100, -10);
+//		lblNewLabel_1.setLayoutData(fd_lblNewLabel_1);
+//		lblNewLabel_1.setText("New Label");
+		
+		
+		
+		
+		
+		
 		for(int i = 0; i < 30; ++i){
 			TableItem tableItem = new TableItem(stockListTable, SWT.CENTER);
 			tableItem.setText(new String[] 

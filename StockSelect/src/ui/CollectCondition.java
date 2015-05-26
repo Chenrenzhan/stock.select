@@ -2,21 +2,30 @@ package ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.SWT;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class CollectCondition extends Composite {
 
+	
+	private static final Image delete_icon_hover = 
+			new Image(Display.getDefault(), "icons/close_btn_active_small.png");
+	private static final Image delete_icon = 
+			new Image(Display.getDefault(), "icons/close_btn_small.png");
+	
 	private CLabel lblCollectCondition;
-	private CLabel lblDelete;
+	private Label lblDelete;
 	
 	public CLabel getLblCollectCondition() {
 		return lblCollectCondition;
 	}
 
-	public CLabel getLblDelete() {
+	public Label getLblDelete() {
 		return lblDelete;
 	}
 
@@ -31,13 +40,37 @@ public class CollectCondition extends Composite {
 		
 		lblCollectCondition = new CLabel(this, SWT.NONE);
 		lblCollectCondition.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		lblCollectCondition.setBounds(10, 3, 258, 23);
+		lblCollectCondition.setBounds(10, 2, 258, 23);
 		lblCollectCondition.setText("收藏条件1");
 		
-		lblDelete = new CLabel(this, SWT.NONE);
+		lblDelete = new Label(this, SWT.NONE);
 		lblDelete.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
-		lblDelete.setBounds(288, 8, 17, 17);
-		lblDelete.setText("删除");
+		lblDelete.setBounds(288, 3, 20, 20);
+//		lblDelete.setText("删除");
+		lblDelete.setImage(delete_icon);
+		System.out.println(delete_icon.getBounds());
+		lblDelete.addMouseTrackListener(new MouseTrackListener() {
+			
+			@Override
+			public void mouseHover(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExit(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				lblDelete.setImage(delete_icon);
+				System.out.println("icon exit");
+			}
+			
+			@Override
+			public void mouseEnter(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				lblDelete.setImage(delete_icon_hover);
+				System.out.println("icon enter");
+			}
+		});
 
 	}
 	
