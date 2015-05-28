@@ -44,7 +44,6 @@ public class CollectCondition extends Composite {
 //		lblDelete.setText("删除");
 		lblDelete.setImage(delete_icon);
 		lblDelete.setData("index", index);
-		System.out.println(delete_icon.getBounds());
 		lblDelete.addMouseTrackListener(new MouseTrackListener() {
 			@Override
 			public void mouseHover(MouseEvent arg0) {
@@ -55,14 +54,12 @@ public class CollectCondition extends Composite {
 			public void mouseExit(MouseEvent arg0) {
 				// TODO Auto-generated method stub
 				lblDelete.setImage(delete_icon);
-				System.out.println("icon exit");
 			}
 			
 			@Override
 			public void mouseEnter(MouseEvent arg0) {
 				// TODO Auto-generated method stub
 				lblDelete.setImage(delete_icon_hover);
-				System.out.println("icon enter");
 			}
 		});
 

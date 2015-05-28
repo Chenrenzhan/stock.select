@@ -45,7 +45,6 @@ public class StockListTable extends Table {
 //				| SWT.FULL_SELECTION);
 		setHeaderVisible(true);
 		setLinesVisible(true);
-		System.out.println(getBounds());
 		for (int i = 0; i < HEADER.length; ++i) {
 			TableColumn tblclmnNewColumn = new TableColumn(this,
 					SWT.CENTER);

@@ -17,13 +17,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.*;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-//import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CrawStocks {
 	public static final String CHARSET = "utf-8";
+	public static final String URL_RESEACH = 
+			"http://www.iwencai.com/stockpick/search"
+			+ "?typed=0&preParams=&ts=1&f=1&qs=1&selfsectsn="
+			+ "&querytype=&searchfilter=&tid=stockpick&w=pe";
+	public static final String URL_BASE_AJAX = 
+			"http://www.iwencai.com/stockpick";
 
 	/**
      * Method: crawFromUrl 
@@ -38,7 +43,6 @@ public class CrawStocks {
 	public static String crawFromUrl(String url, String charset) 
 			throws ClientProtocolException, IOException {
 		HttpClient hc = new DefaultHttpClient();//有错
-		System.out.println("aaaaaaaaaaaaaaaaaa");
 		HttpGet hg = new HttpGet(url);
 		HttpResponse response = hc.execute(hg);
 		HttpEntity entity = response.getEntity();
@@ -124,8 +128,7 @@ public class CrawStocks {
 		JSONObject jsonObj = stringToJson(str); 
 		if(jsonObj != null){
 			try {
-//				saveFile("data/aaa.txt",str);
-				System.out.println("craw finnish");
+				//saveFile("data/aaa.txt",str);
 				return jsonObj.getJSONArray("list");
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -169,8 +172,7 @@ public class CrawStocks {
      * @throws IOException
      * if an error occurred 
      */
-    public static String InputStream2String(InputStream in_st,String charset) 
-    		throws IOException{
+    public static String InputStream2String(InputStream in_st,String charset) throws IOException{
         BufferedReader buff = new BufferedReader(new InputStreamReader(in_st, charset));
         StringBuffer res = new StringBuffer();
         String line = "";
@@ -180,29 +182,18 @@ public class CrawStocks {
         return res.toString();
     }
     
-	public static JSONArray getJA(){
-		String str = IORW.read("data/stocks_result.txt");
-		System.out.println(str);
-		try {
-			JSONArray ja = new JSONArray(str);
-			return ja;
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+	
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		String url_search = "http://www.iwencai.com/stockpick/search?typed=0&preParams=&ts=1&f=1&qs=1&selfsectsn=&querytype=&searchfilter=&tid=stockpick&w=pe";
 		String url_base_ajax = "http://www.iwencai.com/stockpick";
 		
-		String ajaxStr = ajaxResquest(url_base_ajax, 
-				getAjaxParam(url_search, CHARSET));
+		String ajaxStr = ajaxResquest(URL_BASE_AJAX, 
+				getAjaxParam(URL_RESEACH, CHARSET));
 		JSONArray stocksArray_json = getStocksArray(ajaxStr);
-		saveFile("data/stocks_result.txt", stocksArray_json.toString());
-    
+//		saveFile("data/stocks_result.txt", stocksArray_json.toString());
+		System.out.println("finish");
 	}
 	
 }

@@ -38,7 +38,6 @@ public class CloseListerner implements MouseTrackListener, MouseListener {
 	@Override
 	public void mouseUp(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		System.out.println("mouse up");
 		shell.dispose();
 	}
 
@@ -47,7 +46,6 @@ public class CloseListerner implements MouseTrackListener, MouseListener {
 		// TODO Auto-generated method stub
 		getBtnClose(e);
 		btnClose.setImage(CLOSE_HOVER);
-		System.out.println("close enter");
 	}
 
 	@Override
@@ -55,7 +53,6 @@ public class CloseListerner implements MouseTrackListener, MouseListener {
 		// TODO Auto-generated method stub
 		getBtnClose(e);
 		btnClose.setImage(CLOSE);
-		System.out.println("close exit");
 	}
 
 	@Override

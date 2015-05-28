@@ -67,3 +67,4 @@ icons/
 *.png
 data/
 StockSelect/derby.log
+StockSelect/各种常见java.sql.SQLException归纳.txt

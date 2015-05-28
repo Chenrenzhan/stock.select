@@ -38,7 +38,6 @@ public class MinListerner implements MouseTrackListener, MouseListener {
 	@Override
 	public void mouseUp(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		System.out.println("min");
 		shell.setMinimized(true);
 	}
 
@@ -47,7 +46,6 @@ public class MinListerner implements MouseTrackListener, MouseListener {
 		// TODO Auto-generated method stub
 		getBtnMin(e);
 		btnMin.setImage(Min_HOVER);
-		System.out.println("min enter");
 	}
 
 	@Override
@@ -55,7 +53,6 @@ public class MinListerner implements MouseTrackListener, MouseListener {
 		// TODO Auto-generated method stub
 		getBtnMin(e);
 		btnMin.setImage(Min);
-		System.out.println("min exit");
 	}
 
 	@Override

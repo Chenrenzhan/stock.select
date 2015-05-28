@@ -16,13 +16,11 @@ public class CollectionCondition {
 	public CollectionCondition(String name, ArrayList<Condition> conditionList){
 		this.name = name;
 		this.conditionList = conditionList;
-//		System.out.println(conditionList.get(0).getMin().getClass());
 	}
 
 	public JSONObject toJsonCondition() throws JSONException{
 		jsonConditon = new JSONObject();
 		JSONArray ja = new JSONArray();
-		System.out.println("dsaaaa        " + conditionList.size());
 		for(int i = 0; i < conditionList.size(); ++i ){
 			Condition c = conditionList.get(i);
 			JSONObject jo = new JSONObject();

@@ -16,6 +16,12 @@ import org.json.JSONException;
 import controller.CrawStocks;
 
 public class SQLdb {
+	private static final String URL_RESEACH = 
+			"http://www.iwencai.com/stockpick/search"
+			+ "?typed=0&preParams=&ts=1&f=1&qs=1&selfsectsn="
+			+ "&querytype=&searchfilter=&tid=stockpick&w=pe";
+	private static final String URL_BASE_AJAX = 
+			"http://www.iwencai.com/stockpick";
 	
 	private static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
 	private static final String PROTOCOL = "jdbc:derby:";
@@ -42,6 +48,7 @@ public class SQLdb {
 		
 		loadDriver();
 		statement = connect();
+//		createdbTable();
 //		this.stockArray = stockArray;
 	}
 	
@@ -55,6 +62,30 @@ public class SQLdb {
 		createdbTable();
 	}
 	
+	public void update(){
+		
+		String ajaxStr = "[]";
+		try {
+			ajaxStr = CrawStocks.ajaxResquest(CrawStocks.URL_BASE_AJAX, 
+					CrawStocks.getAjaxParam(CrawStocks.URL_RESEACH, 
+							CrawStocks.CHARSET));
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		JSONArray stocksArray_json = CrawStocks.getStocksArray(ajaxStr);
+		this.stockArray = stocksArray_json;
+		
+		dropTable();
+		createdbTable();
+		try {
+			insertData();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	static void loadDriver() {
 		try {
@@ -92,7 +123,6 @@ public class SQLdb {
 	}
 	
 	public void executeSQL(String sql){
-		System.out.println(sql);
 		try {
 			statement.execute(sql);
 		} catch (SQLException e) {
@@ -117,25 +147,38 @@ public class SQLdb {
 		if(conditionSql != ""){
 			querySql += " where " + conditionSql;
 		}
-		System.out.println(querySql);
 		ResultSet rs = null;
 		try {
 			rs = statement.executeQuery(querySql);
-			System.out.println(rs.next());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return rs;
 	}
-	
-	//查询极值
-	public ResultSet queryExtre(String colName){
-		String sqlString = "select min("+colName+"),max("+colName+") from "+TABLE_NAME;
+
+	// 查找所有记录
+	public ResultSet query() {
+		String querySql = "select * from " + TABLE_NAME;
+		
+		ResultSet rs = null;
+		try {
+			rs = statement.executeQuery(querySql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return rs;
+	}
+
+	// 查询极值
+	public ResultSet queryExtre(String colName) {
+	String sqlString = "select min("+colName+"),max("+colName+") from "+TABLE_NAME;
 		ResultSet rs = null;
 		try {
 			rs = statement.executeQuery(sqlString);
-			System.out.println(rs.next());
+			rs.next();
+			System.out.println("min   " + rs.getDouble(1));
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,12 +188,35 @@ public class SQLdb {
 	
 	//创建表
 	public void createdbTable(){
-		executeSQL(CREATE_TABLE_SQL);
+		try{
+			
+			statement.execute("select code form " + TABLE_NAME);
+			
+		} catch (SQLException e) {
+			executeSQL(CREATE_TABLE_SQL);
+
+			try {
+				connection.commit();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+		}
+
 	}
 	
 	//删除表
 	public void dropTable(){
-		executeSQL("drop table " + TABLE_NAME);
+		try{
+			queryExtre("code");
+			executeSQL("drop table " + TABLE_NAME);
+			connection.commit();
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+		
 	}
 	
 	
@@ -199,6 +265,23 @@ public class SQLdb {
 		}
 	}
 	
+	public int getCount(){
+		int count = 0;
+		try {
+			ResultSet rs = query();
+//			
+			while(rs.next()){
+				count++;
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return count;
+	}
+	
 	public void shutdow(){
 		
 		System.out.println("Closedresultsetandstatement");
@@ -218,8 +301,7 @@ public class SQLdb {
 	
 	public static void main(String[] argv) 
 			throws ClientProtocolException, IOException, SQLException{
-		String url_search = "http://www.iwencai.com/stockpick/search?typed=0&preParams=&ts=1&f=1&qs=1&selfsectsn=&querytype=&searchfilter=&tid=stockpick&w=pe";
-		String url_base_ajax = "http://www.iwencai.com/stockpick";
+		
 		
 //		String ajaxStr = CrawStocks.ajaxResquest(url_base_ajax, 
 //				CrawStocks.getAjaxParam(url_search, CrawStocks.CHARSET));
@@ -229,6 +311,7 @@ public class SQLdb {
 //		System.out.println(stocksArray_json.toString());
 //		SQLdb sqldb = new SQLdb(stocksArray_json);
 		SQLdb sqldb = new SQLdb();
+//		sqldb.update();
 //		sqldb.connect();
 //		sqldb.dropTable();
 //		sqldb.createdbTable();
@@ -238,8 +321,7 @@ public class SQLdb {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		System.out.println("has finished");
-		ResultSet rs = sqldb.query("");
+		ResultSet rs = sqldb.query();
 //		ResultSet rs = sqldb.statement.executeQuery("select * from stock");
 		while(rs.next()) {
 			StringBuilder builder = new StringBuilder();
@@ -247,15 +329,18 @@ public class SQLdb {
 				builder.append(rs.getString(i + 1));
 				builder.append("  ");
 			}
-			System.out.println(builder.toString());
 		}
 		rs.close();
 		
-		for(int i = 0; i < TABLE_COL_NAME.length; ++i){
-			ResultSet rs1 = sqldb.queryExtre(TABLE_COL_NAME[i]);
-			System.out.println(rs1.getString(1) + "   " + rs1.getString(2));
-		}
-		
+//		for(int i = 0; i < TABLE_COL_NAME.length; ++i){
+//			ResultSet rs1 = sqldb.queryExtre(TABLE_COL_NAME[i]);
+//			System.out.println(rs1.getString(1) + "   " + rs1.getString(2));
+//		}
+		System.out.println("drop Tabel");
+		sqldb.dropTable();
+		System.out.println("drop suceess");
+		sqldb.createdbTable();
+		sqldb.getCount();
 //		sqldb.shutdow();
 	}
 }

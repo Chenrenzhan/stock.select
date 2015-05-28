@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-public class RefreshListerner implements MouseTrackListener, MouseListener {
+public class RefreshListerner implements MouseTrackListener {
 
 	private static final Image REFRESH = 
 			new Image(Display.getDefault(), "icons/refresh.png");
@@ -23,31 +23,30 @@ public class RefreshListerner implements MouseTrackListener, MouseListener {
 		btnRefresh = null;
 	}
 	
-	@Override
-	public void mouseDoubleClick(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseDown(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseUp(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-//		System.out.println("mouse up");
-//		shell.dispose();
-	}
+//	@Override
+//	public void mouseDoubleClick(MouseEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void mouseDown(MouseEvent arg0) {
+//		// TODO Auto-generated method stub
+//
+//	}
+//
+//	@Override
+//	public void mouseUp(MouseEvent arg0) {
+//		// TODO Auto-generated method stub
+////		System.out.println("mouse up");
+////		shell.dispose();
+//	}
 
 	@Override
 	public void mouseEnter(MouseEvent e) {
 		// TODO Auto-generated method stub
 		getBtnRefresh(e);
 		btnRefresh.setImage(REFRESH_HOVER);
-		System.out.println("close enter");
 	}
 
 	@Override
@@ -55,7 +54,6 @@ public class RefreshListerner implements MouseTrackListener, MouseListener {
 		// TODO Auto-generated method stub
 		getBtnRefresh(e);
 		btnRefresh.setImage(REFRESH);
-		System.out.println("close exit");
 	}
 
 	@Override

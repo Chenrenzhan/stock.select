@@ -34,7 +34,6 @@ public class CursorListener implements MouseTrackListener {
 			hand.isDisposed();
 		}
 		composite.setCursor(arrow);
-		System.out.println("exit");
 	}
 
 	@Override
@@ -47,7 +46,6 @@ public class CursorListener implements MouseTrackListener {
 			arrow.isDisposed();
 		}
 		composite.setCursor(hand);
-		System.out.println("enter");
 	}
 
 }
