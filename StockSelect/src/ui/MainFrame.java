@@ -1,36 +1,40 @@
 package ui;
 
-import javax.lang.model.type.PrimitiveType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import model.CollectionCondition;
+import model.Condition;
+import model.SQLdb;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.TableCursor;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import controller.CollectConditionCtrl;
 
 public class MainFrame {
 	
@@ -52,7 +56,12 @@ public class MainFrame {
 			100, 85, 75 };
 	private static final String[] CHOICE_CONDITION = new String[] { "涨跌幅(%)",
 			"现价(元)", "市盈率(pe)", "动态市盈率", "市净率" };
+	public static final String[] TABLE_COL_NAME = 
+			new String[]{"priceChangeRatio", "curPrice", "pe", "dynamicPE", "pb"};
 
+	//最大的收藏条件个数
+	private static final int MAX_COLLECTIONS_LEN = 8;
+	
 	protected Shell shell;
 	private Composite topComposite;
 	
@@ -61,12 +70,19 @@ public class MainFrame {
 	private Composite optionComposite;
 	private Composite selectComposite;
 	private Table conditionTable;
+	private ArrayList<TableItem> conditionItem;
+	private ArrayList<TableEditor> minEditorItem;
+//	private ArrayList<Text> minTextItem;
+	private ArrayList<TableEditor> maxEditortem;
+//	private ArrayList<Text> maxTextItem;
+	private ArrayList<Condition> textItem;
 	private CLabel lblSelect;
 	private CLabel lblCollectCondition;
 	private CLabel lblResetCondition;
 	private CLabel lblStartReseach;
 
 	private Composite collectComposite;
+	private Composite collectionComposite;
 	private CLabel lblCollect;
 
 	private Composite stockListComposite;
@@ -77,6 +93,14 @@ public class MainFrame {
 	private Label lblNewLabel_1;
 	private Label btnClose;
 	private Label btnMin;
+	
+	private SQLdb sqldb;
+	
+	private CollectConditionCtrl collectCondCtrl;
+	
+	private ArrayList<Condition> conditionValue;
+	
+	private ArrayList<CollectCondition> collCompArray;
 
 	/**
 	 * Launch the application.
@@ -98,9 +122,18 @@ public class MainFrame {
 	 */
 	public void open() {
 		Display display = Display.getDefault();
+		
+		sqldb = new SQLdb();//连接数据库
+		
+		collectCondCtrl = new CollectConditionCtrl();
+		
+		collCompArray = new ArrayList<CollectCondition>();
+		
 		createContents();
 		shell.open();
 		shell.layout();
+		
+//		sqldb = new SQLdb();
 		
 		createIcon();
 		
@@ -176,6 +209,8 @@ public class MainFrame {
 		setCompositeMove(stockListTable);
 		setCompositeMove(lblSelect);
 		setCompositeMove(lblCollect);
+		setCompositeMove(lblResultCount);
+		setCompositeMove(collectionComposite);
 		
 	}
 	
@@ -241,7 +276,7 @@ public class MainFrame {
 
 		createConditionTable();
 		
-//		operation();
+		operation();
 	}
 	
 	public void createConditionTable() {
@@ -269,13 +304,22 @@ public class MainFrame {
 		tcMax.setWidth(102);
 		tcMax.setText("最大值");
 
+		conditionItem = new ArrayList<TableItem>();
+		minEditorItem = new ArrayList<TableEditor>();
+//		minTextItem = new ArrayList<Text>();
+		maxEditortem = new ArrayList<TableEditor>();
+//		maxTextItem = new ArrayList<Text>();
+		textItem = new ArrayList<Condition>();
+		
 		for (int i = 0; i < CHOICE_CONDITION.length; ++i) {
 			TableItem tableItem_1 = new TableItem(conditionTable, SWT.NONE);
 			tableItem_1.setText(new String[] { CHOICE_CONDITION[i], "0.00",
 					"100.00" });
 			tableItem_1.setText(CHOICE_CONDITION[i]);
 			// tableItem_1.set
-
+			
+//			conditionItem.add(tableItem_1);
+			
 			final TableEditor editorMin = new TableEditor(conditionTable);
 			final TableEditor editorMax = new TableEditor(conditionTable);
 
@@ -283,8 +327,8 @@ public class MainFrame {
 			final Text textMin = new Text(conditionTable, SWT.NONE);
 			final Text textMax = new Text(conditionTable, SWT.NONE);
 			// textMin.setEditable(false);
-			textMin.setEnabled(false); // 设置可否编辑
-			textMin.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
+//			textMin.setEnabled(false); // 设置可否编辑
+//			textMin.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
 
 			// 将文本框当前值，设置为表格中的值
 			textMin.setText(tableItem_1.getText(1));
@@ -307,9 +351,45 @@ public class MainFrame {
 					editorMax.getItem().setText(2, textMax.getText());
 				}
 			});
+			
+			conditionItem.add(tableItem_1);
+			minEditorItem.add(editorMin);
+//			minTextItem.add(textMin);
+			maxEditortem.add(editorMax);
+//			maxTextItem.add(textMax);
+			textItem.add(new Condition(i, textMin, textMax));
+		}
+		
+		try {
+			setExtreValue();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
+
+	// 设置筛选条件的最大值最小值
+//	public void setExtreValue() throws SQLException {
+//		for (int i = 0; i < conditionItem.size(); ++i) {
+////			TableItem ti = conditionItem.get(i);
+////			TableEditor minte = minEditorItem.get(i);
+//			Text mintext = (Text) textItem.get(i).getMin();
+////			TableEditor maxte = maxEditortem.get(i);
+//			Text maxtext = (Text) textItem.get(i).getMax();
+//			
+////			System.out.println(ti.getText());
+//			
+//			ResultSet rs = sqldb.queryExtre(TABLE_COL_NAME[i]);
+//			
+//			mintext.setText(rs.getString(1));
+//			maxtext.setText(rs.getString(2));
+//			
+////			ti.setText(1, "-1000");
+////			ti.setText(2, rs.getString(2));
+////			System.out.println(rs.getString(1) + "   " + rs.getString(2));
+//		}
+//	}
+
 	public void operation() {
 		lblCollectCondition = new CLabel(selectComposite, SWT.CENTER);
 		lblCollectCondition.setForeground(SWTResourceManager
@@ -319,7 +399,8 @@ public class MainFrame {
 		lblCollectCondition.setBounds(10, 180, 67, 23);
 		lblCollectCondition.setText("收藏条件");
 		lblCollectCondition.addMouseTrackListener(new CursorListener(shell));
-
+		collectListerner();
+		
 		lblResetCondition = new CLabel(selectComposite, SWT.CENTER);
 		lblResetCondition.setBackground(SWTResourceManager
 				.getColor(SWT.COLOR_LIST_SELECTION));
@@ -328,6 +409,7 @@ public class MainFrame {
 		lblResetCondition.setBounds(125, 180, 67, 23);
 		lblResetCondition.setText("重置条件");
 		lblResetCondition.addMouseTrackListener(new CursorListener(shell));
+		reset();
 
 		lblStartReseach = new CLabel(selectComposite, SWT.CENTER);
 		lblStartReseach.setForeground(SWTResourceManager
@@ -337,7 +419,10 @@ public class MainFrame {
 		lblStartReseach.setBounds(244, 180, 67, 23);
 		lblStartReseach.setText("开始搜索");
 		lblStartReseach.addMouseTrackListener(new CursorListener(shell));
+		startReseach();
 	}
+	
+	
 	
 	public void createCollectComposite() {
 		collectComposite = new Composite(optionComposite, SWT.NONE);
@@ -355,19 +440,47 @@ public class MainFrame {
 				.getColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
 		lblCollect.setAlignment(SWT.CENTER);
 		
-		createCollectCondition();
+		createCollectionComp();
+		
+		try {
+			showCollection();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		createCollectCondition();
+	}
+
+	public void createCollectionComp() {
+		collectionComposite = new Composite(collectComposite, SWT.NONE);
+		collectionComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		collectionComposite.setBounds(0, 30, 321, 278);
+		collectionComposite.setLayout(null);
 	}
 	
-	public void createCollectCondition(){
-		for(int i = 0; i < 8; ++i){
-			CollectCondition cc = new CollectCondition(collectComposite);
-			cc.setSize(321, 30);
-			cc.setLocation(0, 35 * (i+1));
-			CLabel lblCondition = cc.getLblCollectCondition();
-			lblCondition.setText("收藏条件" + i);
-			lblCondition.addMouseTrackListener(new CursorListener(cc));
-		}
-	}
+//	public void createCollectCondition(){
+//		for(int i = 0; i < 8; ++i){
+//			CollectCondition cc = new CollectCondition(collectionComposite, i);
+//			cc.setSize(321, 30);
+//			cc.setLocation(0, 35 * i + 5);
+//			CLabel lblCondition = cc.getLblCollectCondition();
+//			lblCondition.setText("收藏条件" + i);
+//			lblCondition.addMouseTrackListener(new CursorListener(cc));
+//			
+//			Label lblDelete = cc.getLblDelete();
+//			lblDelete.addMouseListener(new MouseListenerAdapt() {
+//				
+//				@Override
+//				public void mouseUp(MouseEvent e) {
+//					// TODO Auto-generated method stub
+//					Label lbl = (Label) e.getSource();
+//					int index = (int) lbl.getData("index");
+//					System.out.println("index    " + index);
+//				}
+//			});
+//		}
+//		
+//	}
 
 	public void createStockListComposite() {
 		lblResultCount = new CLabel(topComposite, SWT.NONE);
@@ -398,7 +511,6 @@ public class MainFrame {
 				.getColor(SWT.COLOR_WHITE));
 		stockListComposite.setLayout(new FillLayout(SWT.HORIZONTAL));
 		
-		System.out.println(stockListComposite.getBounds());
 		
 //		stockListTable = new StockListTable(stockListComposite);
 		
@@ -406,7 +518,6 @@ public class MainFrame {
 				| SWT.FULL_SELECTION);
 		stockListTable.setHeaderVisible(true);
 		stockListTable.setLinesVisible(true);
-		System.out.println(stockListTable.getBounds());
 		for (int i = 0; i < HEADER.length; ++i) {
 			TableColumn tblclmnNewColumn = new TableColumn(stockListTable,
 					SWT.CENTER);
@@ -421,23 +532,280 @@ public class MainFrame {
 
 		TableCursor tableCursor = new TableCursor(stockListTable, SWT.BORDER);
 		
-//		lblNewLabel_1 = new Label(topComposite, SWT.NONE);
-//		FormData fd_lblNewLabel_1 = new FormData();
-//		fd_lblNewLabel_1.top = new FormAttachment(optionComposite, 0, SWT.TOP);
-//		fd_lblNewLabel_1.right = new FormAttachment(100, -10);
-//		lblNewLabel_1.setLayoutData(fd_lblNewLabel_1);
-//		lblNewLabel_1.setText("New Label");
 		
 		
 		
-		
-		
-		
-		for(int i = 0; i < 30; ++i){
-			TableItem tableItem = new TableItem(stockListTable, SWT.CENTER);
-			tableItem.setText(new String[] 
-					{ String.valueOf(i), "2", "3", "4", "5", "6", "7", "8" });
+		try {
+			createTableItem();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
+	}
+	
+	public void createTableItem() throws SQLException{
+		
+//		SQLdb sqldb = new SQLdb();
+		ResultSet rs = sqldb.query("");
+		showResult(rs);
+	}
+	
+	public void clearTableItem(){
+		stockListTable.removeAll();
+	}
+
+	// 设置筛选条件的最大值最小值
+	public void setExtreValue() throws SQLException {
+			for (int i = 0; i < conditionItem.size(); ++i) {
+				Text mintext = (Text) textItem.get(i).getMin();
+				Text maxtext = (Text) textItem.get(i).getMax();
+				
+				ResultSet rs = sqldb.queryExtre(TABLE_COL_NAME[i]);
+				
+				mintext.setText(rs.getString(1));
+				maxtext.setText(rs.getString(2));
+			}
+		}
+
+	
+	//显示结果
+	public void showResult(ResultSet rs) throws SQLException {
+		
+		clearTableItem();
+		
+		int index = 1;
+		while (rs.next()) {
+			TableItem tableItem = new TableItem(stockListTable, SWT.CENTER);
+			String[] text = new String[8];
+
+			text[0] = String.valueOf(index++);
+
+			for (int i = 1; i < 8; ++i) {
+				String str = rs.getString(i);
+				if(str == null)
+					str = "--";
+				text[i] = str;
+			}
+			tableItem.setText(text);
+		}
+		rs.close();
+		
+		lblResultCount.setText("共有" + (index-1) + "股符合条件");
+	}
+
+	// 开始搜索按钮
+	public void startReseach() {
+		lblStartReseach.addMouseListener(new MouseListenerAdapt() {
+
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				for (int i = 0; i < conditionItem.size(); ++i) {
+					TableItem ti = conditionItem.get(i);
+					Boolean isChecked = ti.getChecked();
+					Condition cd = textItem.get(i);
+					cd.setIsChosen(isChecked);
+				}
+				ResultSet rs = reseach();
+				try {
+					showResult(rs);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	//开始搜索
+	public ResultSet reseach(){
+		ResultSet rs = null;
+		String querySql = "";
+		for(int i = 0; i < textItem.size(); ++i){
+			Condition cd = textItem.get(i);
+			if(cd.getIsChosen()){
+				querySql += "(" + TABLE_COL_NAME[i] + ">" 
+						 + ((Text) cd.getMin()).getText()
+						 +  " and " + TABLE_COL_NAME[i] + "<" 
+						 + ((Text) cd.getMax()).getText() + ")" + " and ";
+			}
+		}
+		if(querySql == ""){
+			querySql = "pe>100 and pe<0";
+		}
+		else{
+			querySql = querySql.substring(0, querySql.length() - 5);
+			querySql = "(" + querySql + ")" ;
+		}
+		
+		rs = sqldb.query(querySql);
+		return rs;
+	}
+
+	public void reset(){
+		lblResetCondition.addMouseListener(new MouseListenerAdapt() {
+			
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				try {
+					setExtreValue();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for(TableItem ti : conditionItem){
+					ti.setChecked(false);
+				}
+			}
+		});
+	}
+	
+//	lblCollectCondition.addMouseTrackListener(new CursorListener(shell));
+	public void collectListerner(){
+		lblCollectCondition.addMouseListener(new MouseListenerAdapt() {
+			
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				ConditionNameDialog nameDialog = new ConditionNameDialog(shell);
+				nameDialog.open();
+				String name = nameDialog.getName();
+				if(name == null){
+					return ;
+				}
+				setChecked();
+				CollectionCondition cc = 
+						new CollectionCondition(name, textItem);
+				try {
+					collectCondCtrl.addCollection(cc);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				collectCondCtrl.save();
+				try {
+					showCollection();
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public void setChecked(){
+		for(int i = 0; i < conditionItem.size(); ++i){
+			textItem.get(i).setIsChosen(
+					conditionItem.get(i).getChecked());
+		}
+	}
+	
+	//显示收藏条件
+	public void showCollection() throws JSONException{
+		
+//		createCollectionComp
+//		collectionComposite
+		if(collCompArray != null){
+			for(CollectCondition cctemp : collCompArray){
+				cctemp.dispose();
+//				collCompArray.remove(cctemp);
+			}
+		}
+		collCompArray = null;
+		collCompArray = new ArrayList<CollectCondition>();
+		
+		collectionComposite.setVisible(true);
+		collectionComposite.layout(true);
+		
+		JSONArray conditionArray = collectCondCtrl.getConditionArray();
+		for(int i = 0; i < conditionArray.length(); ++i){
+			final JSONObject jo = conditionArray.getJSONObject(i);
+			String name = jo.getString("name");
+			
+			CollectCondition cc = new CollectCondition(collectionComposite, i);
+			cc.setSize(321, 30);
+			cc.setLocation(0, 35*i + 5);
+			CLabel lblCondition = cc.getLblCollectCondition();
+			lblCondition.setText(name);
+			lblCondition.addMouseTrackListener(new CursorListener(cc));
+			cc.setVisible(true);
+			
+//			CLabel clblName = cc.getLblCollectCondition();
+			lblCondition.addMouseListener(new MouseListenerAdapt() {
+				
+				@Override
+				public void mouseUp(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					try {
+						showCondition(jo);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			Label lblDelete = cc.getLblDelete();
+			lblDelete.addMouseListener(new MouseListenerAdapt() {
+				
+				@Override
+				public void mouseUp(MouseEvent e) {
+					// TODO Auto-generated method stub
+					Label lbl = (Label) e.getSource();
+					int index = (int) lbl.getData("index");
+//					deleColl(index);
+					try {
+						collectCondCtrl.deleteConllection(index);
+					} catch (JSONException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+					collectCondCtrl.save();
+					try {
+						showCollection();
+					} catch (JSONException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+			});
+			
+			collCompArray.add(cc);
+		}
+	}
+
+	//显示选中的收藏的条件
+	public void showCondition(JSONObject jo) throws JSONException{
+		JSONArray ja = jo.getJSONArray("condition");
+		
+		for(int i = 0; i < conditionItem.size(); ++i){
+			conditionItem.get(i).setChecked(false);
+			
+			JSONObject jotemp = ja.getJSONObject(i);
+			Boolean isChosen = jotemp.getBoolean("isChosen");
+			System.out.println("isChosen   " + isChosen);
+			if(!isChosen){
+				continue;
+			}
+			conditionItem.get(i).setChecked(isChosen);
+			textItem.get(i).setIsChosen(isChosen);
+			((Text) textItem.get(i).getMin())
+				.setText(jotemp.getString("min"));
+			((Text) textItem.get(i).getMax())
+				.setText(jotemp.getString("max"));
+		}
+	}
+	
+//	//检查收藏条件是否大于8
+//		public void checkOver(){
+//			for(int i = 8; i < collCompArray.size(); ++i){
+//				collCompArray.remove(i);
+//			}
+//		}
+	
+	public void selecCondition() {
+
 	}
 }

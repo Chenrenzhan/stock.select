@@ -12,12 +12,11 @@ public abstract class MouseListenerAdapt implements MouseListener {
 	}
 
 	@Override
-	abstract public void mouseDown(MouseEvent arg0);
+	public void mouseDown(MouseEvent arg0){
+		
+	}
 
 	@Override
-	public void mouseUp(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
+	abstract public void mouseUp(MouseEvent arg0);
 
 }

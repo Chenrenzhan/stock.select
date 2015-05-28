@@ -23,7 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CrawStocks {
-	private static final String CHARSET = "utf-8";
+	public static final String CHARSET = "utf-8";
 
 	/**
      * Method: crawFromUrl 
@@ -123,7 +123,9 @@ public class CrawStocks {
 	public static JSONArray getStocksArray(String str){
 		JSONObject jsonObj = stringToJson(str); 
 		if(jsonObj != null){
-			try {saveFile("data/aaa.txt",str);
+			try {
+//				saveFile("data/aaa.txt",str);
+				System.out.println("craw finnish");
 				return jsonObj.getJSONArray("list");
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -167,7 +169,8 @@ public class CrawStocks {
      * @throws IOException
      * if an error occurred 
      */
-    public static String InputStream2String(InputStream in_st,String charset) throws IOException{
+    public static String InputStream2String(InputStream in_st,String charset) 
+    		throws IOException{
         BufferedReader buff = new BufferedReader(new InputStreamReader(in_st, charset));
         StringBuffer res = new StringBuffer();
         String line = "";
@@ -177,7 +180,18 @@ public class CrawStocks {
         return res.toString();
     }
     
-	
+	public static JSONArray getJA(){
+		String str = IORW.read("data/stocks_result.txt");
+		System.out.println(str);
+		try {
+			JSONArray ja = new JSONArray(str);
+			return ja;
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub

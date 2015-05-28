@@ -20,24 +20,19 @@ public class CollectCondition extends Composite {
 	
 	private CLabel lblCollectCondition;
 	private Label lblDelete;
+	private int index;
 	
-	public CLabel getLblCollectCondition() {
-		return lblCollectCondition;
-	}
-
-	public Label getLblDelete() {
-		return lblDelete;
-	}
-
 	/**
 	 * Create the composite.
 	 * @param parent
 	 * @param style
 	 */
-	public CollectCondition(Composite parent) {
-		super(parent, SWT.BORDER);
-		setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+	public CollectCondition(Composite parent, int index) {
 		
+		super(parent, SWT.BORDER);
+		this.index = index;
+		
+		setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		lblCollectCondition = new CLabel(this, SWT.NONE);
 		lblCollectCondition.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		lblCollectCondition.setBounds(10, 2, 258, 23);
@@ -48,13 +43,12 @@ public class CollectCondition extends Composite {
 		lblDelete.setBounds(288, 3, 20, 20);
 //		lblDelete.setText("删除");
 		lblDelete.setImage(delete_icon);
+		lblDelete.setData("index", index);
 		System.out.println(delete_icon.getBounds());
 		lblDelete.addMouseTrackListener(new MouseTrackListener() {
-			
 			@Override
 			public void mouseHover(MouseEvent arg0) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
@@ -82,5 +76,23 @@ public class CollectCondition extends Composite {
 	@Override
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components
+	}
+	
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+//		lblDelete.setData("index", index);
+	}
+
+	public CLabel getLblCollectCondition() {
+		return lblCollectCondition;
+		
+	}
+
+	public Label getLblDelete() {
+		return lblDelete;
 	}
 }

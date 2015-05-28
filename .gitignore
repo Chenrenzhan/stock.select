@@ -66,3 +66,4 @@ lib/
 icons/
 *.png
 data/
+StockSelect/derby.log
