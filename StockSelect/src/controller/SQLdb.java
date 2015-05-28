@@ -1,4 +1,4 @@
-package model;
+package controller;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -12,8 +12,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.eclipse.ui.Saveable;
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import controller.CrawStocks;
 
 public class SQLdb {
 	private static final String URL_RESEACH = 

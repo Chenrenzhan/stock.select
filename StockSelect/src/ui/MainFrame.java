@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import model.CollectionCondition;
 import model.Condition;
-import model.SQLdb;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -36,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import controller.CollectConditionCtrl;
+import controller.SQLdb;
 
 public class MainFrame {
 	
