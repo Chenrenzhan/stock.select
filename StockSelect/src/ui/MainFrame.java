@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -125,6 +126,13 @@ public class MainFrame {
 		
 		sqldb = new SQLdb();//连接数据库
 		
+		if(sqldb.getCount() == 0){
+			System.out.println("sssssssssssss");
+			sqldb.update();
+		}
+		
+			
+		
 		collectCondCtrl = new CollectConditionCtrl();
 		
 		collCompArray = new ArrayList<CollectCondition>();
@@ -132,8 +140,6 @@ public class MainFrame {
 		createContents();
 		shell.open();
 		shell.layout();
-		
-//		sqldb = new SQLdb();
 		
 		createIcon();
 		
@@ -165,7 +171,45 @@ public class MainFrame {
 		btnRefresh.setImage(REFRESH);
 		btnRefresh.setVisible(true);
 		btnRefresh.addMouseTrackListener(new RefreshListerner());
-		btnRefresh.addMouseListener(new RefreshListerner());
+//		btnRefresh.addMouseListener(new RefreshListerner());
+		btnRefresh.addMouseListener(new MouseListenerAdapt() {
+			
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				Thread td =  new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						sqldb.update();
+						System.out.println(("update finished"));
+						
+//						MessageBox finishBox = new MessageBox(shell, 
+//								SWT.CLOSE | SWT.ICON_INFORMATION);
+//						finishBox.setText("数据跟新完成！");
+						shell.getDisplay().asyncExec(new Runnable() {
+
+							@Override
+							public void run() {
+//								MessageBox finishBox = new MessageBox(shell, 
+//										SWT.CLOSE | SWT.ICON_INFORMATION);
+//								finishBox.setText("数据跟新完成！");
+								
+								try {
+									setExtreValue();//刷新后的最大最小值
+								} catch (SQLException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+								
+						});
+					}
+				});
+				td.start();
+			}
+		});
 		
 		btnClose = new Label(topComposite, SWT.NONE);
 		btnClose.setToolTipText("关闭");
@@ -491,7 +535,7 @@ public class MainFrame {
 		fd_lblResultCount.top = new FormAttachment(optionComposite, 0, SWT.TOP);
 		fd_lblResultCount.left = new FormAttachment(optionComposite, 6);
 		lblResultCount.setLayoutData(fd_lblResultCount);
-		lblResultCount.setText("共有3700股符合条件");
+		lblResultCount.setText("共有 0 股符合条件");
 		
 //		lblNewLabel = new CLabel(topComposite, SWT.NONE);
 //		FormData fd_lblNewLabel = new FormData();
@@ -547,8 +591,8 @@ public class MainFrame {
 	public void createTableItem() throws SQLException{
 		
 //		SQLdb sqldb = new SQLdb();
-		ResultSet rs = sqldb.query("");
-		showResult(rs);
+		ResultSet rs = sqldb.query();
+//		showResult(rs);
 	}
 	
 	public void clearTableItem(){
@@ -562,7 +606,7 @@ public class MainFrame {
 				Text maxtext = (Text) textItem.get(i).getMax();
 				
 				ResultSet rs = sqldb.queryExtre(TABLE_COL_NAME[i]);
-				
+				System.out.println("min   " + rs.getString(1));
 				mintext.setText(rs.getString(1));
 				maxtext.setText(rs.getString(2));
 			}
@@ -591,7 +635,7 @@ public class MainFrame {
 		}
 		rs.close();
 		
-		lblResultCount.setText("共有" + (index-1) + "股符合条件");
+		lblResultCount.setText("共有 " + (index-1) + " 股符合条件");
 	}
 
 	// 开始搜索按钮
@@ -785,7 +829,6 @@ public class MainFrame {
 			
 			JSONObject jotemp = ja.getJSONObject(i);
 			Boolean isChosen = jotemp.getBoolean("isChosen");
-			System.out.println("isChosen   " + isChosen);
 			if(!isChosen){
 				continue;
 			}
@@ -807,5 +850,10 @@ public class MainFrame {
 	
 	public void selecCondition() {
 
+	}
+
+	public Shell getShell() {
+		// TODO Auto-generated method stub
+		return shell;
 	}
 }
