@@ -297,6 +297,18 @@ public class SQLdb {
 		
 	}
 	
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public Statement getStatement() {
+		return statement;
+	}
+
+	public JSONArray getStockArray() {
+		return stockArray;
+	}
+
 	public static void main(String[] argv) 
 			throws ClientProtocolException, IOException, SQLException{
 		

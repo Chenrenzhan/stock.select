@@ -44,9 +44,16 @@ public class CrawStocksTest {
 
 	@Test
 	//测试抓取回来的字符串是否为空
-	public void testString(){
+	public void testStringEmpty(){
 //		System.out.println(ajaxStr);
 		assertThat("", not(ajaxStr));
+	}
+	
+	@Test
+	//测试抓取回来的字符串是包含数据list
+	public void testString(){
+//		System.out.println(ajaxStr);
+		assertThat("list", containsString(ajaxStr));
 	}
 	
 	@Test
