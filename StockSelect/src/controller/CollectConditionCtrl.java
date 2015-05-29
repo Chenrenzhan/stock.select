@@ -10,13 +10,14 @@ import org.json.JSONObject;
 
 public class CollectConditionCtrl {
 	private static final String PATH = "data/collection_condition.json";
+	//保存收藏条件的最大数
 	private static final int MAX_COLLECTIONS_LEN = 8;
 	
 	private JSONArray conditionArray;
 	
 	public CollectConditionCtrl(){
 		String str = IORW.read(PATH);
-		System.out.println(str);
+		System.out.println("sssssssssssss    " + str);
 		if(str.isEmpty()){
 			str = "[]";
 		}
@@ -85,5 +86,11 @@ public class CollectConditionCtrl {
 
 	public JSONArray getConditionArray() {
 		return conditionArray;
+	}
+	
+	public static void main(String[] argv){
+		CollectConditionCtrl cc = new CollectConditionCtrl();
+		JSONArray ja = cc.getConditionArray();
+		System.out.println(ja.toString());
 	}
 }
