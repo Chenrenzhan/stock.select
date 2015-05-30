@@ -129,7 +129,7 @@ public class MainFrame {
 		Shell startShell = new StartShell(Display.getDefault());
 		startShell.open();
 
-//		if(sqldb.getCount() == 0){
+		if(sqldb.getCount() == 0){
 			Thread td = new Thread(new Runnable() {
 				
 				@Override
@@ -146,7 +146,7 @@ public class MainFrame {
 				e.printStackTrace();
 			}
 			
-//		}
+		}
 		//数据加载完成，注销开始界面
 		startShell.dispose();
 		
