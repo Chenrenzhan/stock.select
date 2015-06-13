@@ -32,7 +32,7 @@ public class SqldbTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-//		sqldb.shutdow();
+		sqldb.shutdow();
 	}
 
 	@Test

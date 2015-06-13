@@ -35,22 +35,22 @@ public class CollectConditionCtrTest {
 		assertThat(len, lessThanOrEqualTo(8));
 	}
 
-	@Test
-	//测试删除一条收藏条件
-	public void tesDelete() {
-		int before = conditionArray.length();
-		System.out.println(conditionArray.toString());
-		System.out.println(before);
-		try {
-			ccCtrl.deleteConllection(0);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		int len = conditionArray.length();
-		System.out.println(len);
-		assertThat(len, equalTo(before - 1));
-	}
-	
+//	@Test
+//	//测试删除一条收藏条件
+//	public void tesDelete() {
+//		int before = conditionArray.length();
+//		System.out.println(conditionArray.toString());
+//		System.out.println(before);
+//		try {
+//			ccCtrl.deleteConllection(0);
+//		} catch (JSONException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		int len = conditionArray.length();
+//		System.out.println(len);
+//		assertThat(len, equalTo(before - 1));
+//	}
+//	
 	
 }

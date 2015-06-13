@@ -14,6 +14,8 @@ import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -34,7 +36,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import controller.CollectConditionCtrl;
+import controller.CrawStockFromXueQiu;
+import controller.CrawStocks;
+import controller.CrawStocksTongHuaShun;
 import controller.SQLdb;
+
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.widgets.Combo;
 
 public class MainFrame {
 	
@@ -69,6 +77,7 @@ public class MainFrame {
 
 	private Composite optionComposite;
 	private Composite selectComposite;
+	private Composite selectHeadComposite;
 	private Table conditionTable;
 	private ArrayList<TableItem> conditionItem;
 	private ArrayList<TableEditor> minEditorItem;
@@ -82,6 +91,7 @@ public class MainFrame {
 	private CLabel lblStartReseach;
 
 	private Composite collectComposite;
+	private Composite colHeadComposite;
 	private Composite collectionComposite;
 	private CLabel lblCollect;
 
@@ -94,7 +104,9 @@ public class MainFrame {
 	private Label btnClose;
 	private Label btnMin;
 	
+	private ArrayList<SQLdb> sqldbs;
 	private SQLdb sqldb;
+	private ArrayList<String> sourceNames;
 	
 	private CollectConditionCtrl collectCondCtrl;
 	
@@ -123,29 +135,14 @@ public class MainFrame {
 	public void open() {
 		Display display = Display.getDefault();
 		
-		sqldb = new SQLdb();//连接数据库
+//		sqldb = new SQLdb();//连接数据库
 		
 		//创建开始界面
 		Shell startShell = new StartShell(Display.getDefault());
 		startShell.open();
-
-		if(sqldb.getCount() == 0){
-			Thread td = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					sqldb.update();
-				}
-			});
-			td.start();
-			try {
-				td.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+		initSql();
+		if (sqldb.getCount() == 0) {
+			sqldb.update();
 		}
 		//数据加载完成，注销开始界面
 		startShell.dispose();
@@ -164,6 +161,26 @@ public class MainFrame {
 		}
 	}
 	
+	public void initSql(){
+		if(sqldbs == null){
+			sqldbs = new ArrayList<SQLdb>();
+		}
+		if(sourceNames == null){
+			sourceNames = new ArrayList<String>();
+		}
+		
+		CrawStocksTongHuaShun ths = new CrawStocksTongHuaShun();
+		CrawStockFromXueQiu xueqiu = new CrawStockFromXueQiu();
+		
+		sqldbs.add(new SQLdb(ths));
+		sqldbs.add(new SQLdb(xueqiu));
+		
+		sourceNames.add(ths.getSourceName());
+		sourceNames.add(xueqiu.getSourceName());
+		
+		sqldb = sqldbs.get(0);
+	}
+	
 	public void createIcon(){
 		btnRefresh = new Label(topComposite, SWT.NONE);
 		btnRefresh.setToolTipText("刷新");
@@ -178,9 +195,7 @@ public class MainFrame {
 		btnRefresh.setImage(REFRESH);
 		btnRefresh.setVisible(true);
 		btnRefresh.addMouseTrackListener(new RefreshListerner());
-//		btnRefresh.addMouseListener(new RefreshListerner());
 		btnRefresh.addMouseListener(new MouseListenerAdapt() {
-			
 			@Override
 			public void mouseUp(MouseEvent arg0) {
 				// TODO Auto-generated method stub
@@ -191,27 +206,6 @@ public class MainFrame {
 						// TODO Auto-generated method stub
 						sqldb.update();
 						System.out.println(("update finished"));
-						
-//						MessageBox finishBox = new MessageBox(shell, 
-//								SWT.CLOSE | SWT.ICON_INFORMATION);
-//						finishBox.setText("数据跟新完成！");
-						shell.getDisplay().asyncExec(new Runnable() {
-
-							@Override
-							public void run() {
-//								MessageBox finishBox = new MessageBox(shell, 
-//										SWT.CLOSE | SWT.ICON_INFORMATION);
-//								finishBox.setText("数据跟新完成！");
-								
-								try {
-									setExtreValue();//刷新后的最大最小值
-								} catch (SQLException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-								
-						});
 					}
 				});
 				td.start();
@@ -262,6 +256,8 @@ public class MainFrame {
 		setCompositeMove(lblCollect);
 		setCompositeMove(lblResultCount);
 		setCompositeMove(collectionComposite);
+		setCompositeMove(selectHeadComposite);
+		setCompositeMove(colHeadComposite);
 		
 	}
 	
@@ -285,7 +281,6 @@ public class MainFrame {
 		topComposite = new Composite(shell, SWT.NONE);
 		topComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
 		topComposite.setLayout(new FormLayout());
-		System.out.println("top   " + topComposite.isDisposed());
 
 		collectCondCtrl = new CollectConditionCtrl();
 		
@@ -320,8 +315,7 @@ public class MainFrame {
 		fd_optionComposite.right = new FormAttachment(0, 331);
 		fd_optionComposite.left = new FormAttachment(0, 10);
 		optionComposite.setLayoutData(fd_optionComposite);
-		optionComposite.setBackground(SWTResourceManager
-				.getColor(SWT.COLOR_WIDGET_BACKGROUND));
+		optionComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
 
 		createSelectComposite();
 		
@@ -336,20 +330,61 @@ public class MainFrame {
 		selectComposite.setSize(321, 204);
 		selectComposite.setBackground(SWTResourceManager
 				.getColor(SWT.COLOR_WHITE));
+
+		createSelectHeadComposite();
 		
-		lblSelect = new CLabel(selectComposite, SWT.SHADOW_NONE);
-		lblSelect.setSize(321, 30);
-		lblSelect.setBackground(SWTResourceManager
-				.getColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+		createConditionTable();
+		
+		operation();
+	}
+	
+	public void createSelectHeadComposite(){
+		selectHeadComposite = new Composite(selectComposite, SWT.NONE);
+		selectHeadComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+		selectHeadComposite.setBounds(0, 0, 321, 30);
+		
+		lblSelect = new CLabel(selectHeadComposite, SWT.SHADOW_NONE);
+		lblSelect.setLocation(0, 0);
+		lblSelect.setSize(80, 30);
+		lblSelect.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		lblSelect.setFont(SWTResourceManager.getFont("Microsoft YaHei UI", 12,
 				SWT.BOLD));
 		lblSelect.setText("选股");
 		lblSelect.setAlignment(SWT.CENTER);
 		
-
-		createConditionTable();
+		final Combo combo = new Combo(selectHeadComposite, SWT.READ_ONLY);
+		combo.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
+		combo.setToolTipText("选取数据来源");
+		combo.setBounds(230, 2, 88, 25);
 		
-		operation();
+		String[] arr = new String[sourceNames.size()];
+		sourceNames.toArray(arr);
+		combo.setItems(arr);
+		combo.select(0);
+		combo.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				int index = combo.getSelectionIndex();
+				sqldb = sqldbs.get(index);
+				try {
+					setExtreValue();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for(TableItem ti : conditionItem){
+					ti.setChecked(false);
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 	
 	public void createConditionTable() {
@@ -359,8 +394,6 @@ public class MainFrame {
 		conditionTable.setSize(321, 134);
 		conditionTable.setHeaderVisible(true);
 		conditionTable.setLinesVisible(true);
-		// conditionTable.setLinesVisible(false);
-		// conditionTable.setBackgroundMode(SWT.INHERIT_FORCE); //设置背景透明
 
 		TableColumn tcCondition = new TableColumn(conditionTable, SWT.NONE);
 		tcCondition.setResizable(false);
@@ -379,9 +412,7 @@ public class MainFrame {
 
 		conditionItem = new ArrayList<TableItem>();
 		minEditorItem = new ArrayList<TableEditor>();
-//		minTextItem = new ArrayList<Text>();
 		maxEditortem = new ArrayList<TableEditor>();
-//		maxTextItem = new ArrayList<Text>();
 		textItem = new ArrayList<Condition>();
 		
 		for (int i = 0; i < CHOICE_CONDITION.length; ++i) {
@@ -391,17 +422,12 @@ public class MainFrame {
 			tableItem_1.setText(CHOICE_CONDITION[i]);
 			// tableItem_1.set
 			
-//			conditionItem.add(tableItem_1);
-			
 			final TableEditor editorMin = new TableEditor(conditionTable);
 			final TableEditor editorMax = new TableEditor(conditionTable);
 
 			// 创建一个文本框，用于输入文字
 			final Text textMin = new Text(conditionTable, SWT.NONE);
 			final Text textMax = new Text(conditionTable, SWT.NONE);
-			// textMin.setEditable(false);
-//			textMin.setEnabled(false); // 设置可否编辑
-//			textMin.setBackground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
 
 			// 将文本框当前值，设置为表格中的值
 			textMin.setText(tableItem_1.getText(1));
@@ -469,11 +495,10 @@ public class MainFrame {
 				.getColor(SWT.COLOR_LIST_SELECTION));
 		lblStartReseach.setBounds(244, 180, 67, 23);
 		lblStartReseach.setText("开始搜索");
+		
 		lblStartReseach.addMouseTrackListener(new CursorListener(shell));
 		startReseach();
 	}
-	
-	
 	
 	public void createCollectComposite() {
 		collectComposite = new Composite(optionComposite, SWT.NONE);
@@ -481,15 +506,6 @@ public class MainFrame {
 		collectComposite.setSize(321, 308);
 		collectComposite.setBackground(SWTResourceManager
 				.getColor(SWT.COLOR_WHITE));
-
-		lblCollect = new CLabel(collectComposite, SWT.SHADOW_NONE);
-		lblCollect.setSize(321, 30);
-		lblCollect.setText("收藏");
-		lblCollect.setFont(SWTResourceManager.getFont("Microsoft YaHei UI", 12,
-				SWT.BOLD));
-		lblCollect.setBackground(SWTResourceManager
-				.getColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
-		lblCollect.setAlignment(SWT.CENTER);
 		
 		createCollectionComp();
 		
@@ -507,6 +523,24 @@ public class MainFrame {
 		collectionComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		collectionComposite.setBounds(0, 30, 321, 278);
 		collectionComposite.setLayout(null);
+		
+		createCollectionHeadCom();
+	}
+
+	public void createCollectionHeadCom() {
+		colHeadComposite = new Composite(collectComposite, SWT.NONE);
+		colHeadComposite.setBackground(SWTResourceManager
+				.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+		colHeadComposite.setBounds(0, 0, 321, 30);
+
+		lblCollect = new CLabel(colHeadComposite, SWT.SHADOW_NONE);
+		lblCollect.setSize(80, 30);
+		lblCollect.setText("收藏");
+		lblCollect.setFont(SWTResourceManager.getFont("Microsoft YaHei UI", 12,
+				SWT.BOLD));
+		lblCollect.setBackground(SWTResourceManager
+				.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+		lblCollect.setAlignment(SWT.CENTER);
 	}
 
 	public void createStockListComposite() {
@@ -568,12 +602,23 @@ public class MainFrame {
 				Text maxtext = (Text) textItem.get(i).getMax();
 				
 				ResultSet rs = sqldb.queryExtre(TABLE_COL_NAME[i]);
-				System.out.println("min   " + rs.getString(1));
-				mintext.setText(rs.getString(1));
-				maxtext.setText(rs.getString(2));
+				String min = rs.getString(1);
+				String max = rs.getString(2);
+				TableItem tim = conditionItem.get(i);
+				if(min == null || max == null){
+					tim.setGrayed(true);
+					min = "--";
+					max = "--";
+				}
+				else {
+					tim.setGrayed(false);
+				}
+				
+				
+				mintext.setText(min);
+				maxtext.setText(max);
 			}
 		}
-
 	
 	//显示结果
 	public void showResult(ResultSet rs) throws SQLException {
@@ -631,10 +676,23 @@ public class MainFrame {
 		for(int i = 0; i < textItem.size(); ++i){
 			Condition cd = textItem.get(i);
 			if(cd.getIsChosen()){
+				String min = ((Text) cd.getMin()).getText();
+				String max = ((Text) cd.getMax()).getText();
+				try{
+					Double.valueOf(min);
+					Double.valueOf(max);
+				}
+				catch(Exception e){
+					e.printStackTrace();
+					continue;
+				}
+//				if(min.equals("--") || max.equals("--")){
+//					continue;
+//				}
+				
 				querySql += "(" + TABLE_COL_NAME[i] + ">" 
-						 + ((Text) cd.getMin()).getText()
-						 +  " and " + TABLE_COL_NAME[i] + "<" 
-						 + ((Text) cd.getMax()).getText() + ")" + " and ";
+						 + min +  " and " + TABLE_COL_NAME[i] + "<" 
+						 + max + ")" + " and ";
 			}
 		}
 		if(querySql == ""){
