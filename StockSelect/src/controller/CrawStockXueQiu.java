@@ -35,7 +35,7 @@ import org.apache.http.protocol.HttpContext;
 
 //import controller.GetThread;
 
-public class CrawStockFromXueQiu extends CrawStocks {
+public class CrawStockXueQiu extends CrawStocks {
 
 	private static final String URL = "http://xueqiu.com/stock/screener/screen.json"
 			+ "?category=SH&exchange=&areacode=&indcode=&orderby=symbol&order=desc"
@@ -63,7 +63,7 @@ public class CrawStockFromXueQiu extends CrawStocks {
 	
 	GetThread[] threads;
 	
-	public CrawStockFromXueQiu() {
+	public CrawStockXueQiu() {
 		super();
 		// TODO Auto-generated constructor stub
 		dataArray = new JSONArray();
@@ -289,7 +289,7 @@ public class CrawStockFromXueQiu extends CrawStocks {
 
 
 	public static void main(String[] argv) {
-		final CrawStockFromXueQiu xq = new CrawStockFromXueQiu();
+		final CrawStockXueQiu xq = new CrawStockXueQiu();
 		xq.update();
 	}
 

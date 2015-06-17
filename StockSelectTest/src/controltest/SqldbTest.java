@@ -12,16 +12,24 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import controller.CrawStocks;
+import controller.CrawStocksTongHuaShun;
 import controller.SQLdb;
 
-public class SqldbTest {
+abstract public class SqldbTest {
 	
 	private  static SQLdb sqldb;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public SqldbTest() {
+		// TODO Auto-generated constructor stub
+	
+	}
+	
+	public static void BeforeClass(CrawStocks crawStocks) 
+			throws Exception {
 		
-		sqldb = new SQLdb();
+		sqldb = new SQLdb(new CrawStocksTongHuaShun());
+		sqldb.execute();
 //		sqldb.createdbTable();
 //		System.out.println(sqldb.getCount());
 //		if(sqldb.getCount() == 0){
@@ -30,14 +38,12 @@ public class SqldbTest {
 //		}
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void AfterClass() throws Exception {
 		sqldb.shutdow();
 	}
 
-	@Test
 	//测试数据库链接状态
-	public void testConnetion() {
+	public static void connetion() {
 		try {
 			assertEquals(false, sqldb.getConnection().isClosed());
 		} catch (SQLException e) {
@@ -46,41 +52,35 @@ public class SqldbTest {
 		}
 	}
 	
-	@Test
 	//测试数据库中记录的总数应该大于2000
-	public void testCount(){
+	public static void count(){
 		int count = sqldb.getCount();
 		assertThat(count, greaterThan(2000));
 	}
 	
-	@Test
 	//测试市盈率pe极值
-	public void testExtenOf_pe(){
-		testExtenValue("pe");
+	public static void extenOf_pe(){
+		extenValue("pe");
 	}
-	@Test
 	//测试涨跌幅极值
-	public void testExtenOf_priceChangeRatio(){
-		testExtenValue("priceChangeRatio");
+	public static void extenOf_priceChangeRatio(){
+		extenValue("priceChangeRatio");
 	}
-	@Test
 	//测试现价极值
-	public void testExtenOf_curPrice(){
-		testExtenValue("curPrice");
+	public static void extenOf_curPrice(){
+		extenValue("curPrice");
 	}
-	@Test
 	//测试动态市盈率极值
-	public void testExtenOf_dynamicPE(){
-		testExtenValue("dynamicPE");
+	public static void extenOf_dynamicPE(){
+		extenValue("dynamicPE");
 	}
-	@Test
 	//测试市净率极值
-	public void testExtenOf_pb(){
-		testExtenValue("pb");
+	public static void extenOf_pb(){
+		extenValue("pb");
 	}
 	
 	//测试最大值最小值查询
-	public void testExtenValue(String condition){
+	public static void extenValue(String condition){
 		ResultSet rs = sqldb.queryExtre(condition);
 		try {
 			double min = rs.getDouble(1);
@@ -95,54 +95,49 @@ public class SqldbTest {
 		}
 	}
 	
-	@Test
 	//测试市盈率pe查询的结果
-	public void testResultOf_pe(){
+	public static void resultOf_pe(){
 		try {
-			testResult("pe", -10.0, 20.0);
+			result("pe", -10.0, 20.0);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	@Test
 	//测试涨跌幅查询的结果
-	public void testResultOf_priceChangeRatio(){
+	public static void resultOf_priceChangeRatio(){
 		try {
-			testResult("priceChangeRatio", -10.0, 20.0);
+			result("priceChangeRatio", -10.0, 20.0);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	@Test
 	//测试现价查询的结果
-	public void testResultOf_curPrice(){
-		testExtenValue("curPrice");
+	public static void resultOf_curPrice(){
+		extenValue("curPrice");
 		try {
-			testResult("curPrice", 10.0, 20.0);
+			result("curPrice", 10.0, 20.0);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	@Test
 	//测试动态市盈率查询的结果
-	public void testResultOf_dynamicPE(){
-		testExtenValue("dynamicPE");
+	public static void resultOf_dynamicPE(){
+		extenValue("dynamicPE");
 		try {
-			testResult("dynamicPE", -10.0, 20.0);
+			result("dynamicPE", -10.0, 20.0);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	@Test
 	//测试市净率查询的结果
-	public void testResultOf_pb(){
-		testExtenValue("pb");
+	public static void resultOf_pb(){
+		extenValue("pb");
 		try {
-			testResult("pb", -10.0, 20);
+			result("pb", -10.0, 20);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -150,7 +145,7 @@ public class SqldbTest {
 	}
 	
 	//测试单一条件查询的结果
-	public void testResult(String condition, double min, double max) 
+	public static void result(String condition, double min, double max) 
 			throws SQLException{
 		String query = "(" + condition + ">" + min
 				+ " and " + condition + "<" + max + ")";
@@ -164,9 +159,8 @@ public class SqldbTest {
 	}
 	
 	
-	@Test
 	//测试关闭数据库
-	public void testShutdown(){
+	public static void shutdown(){
 		sqldb.shutdow();
 		try {
 			assertEquals(true, sqldb.getConnection().isClosed());

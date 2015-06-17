@@ -25,7 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import controller.CrawStockFromXueQiu.GetThread;
+import controller.CrawStockXueQiu.GetThread;
 
 public class CrawStocksTongHuaShun extends CrawStocks{
 	public static final String CHARSET = "utf-8";

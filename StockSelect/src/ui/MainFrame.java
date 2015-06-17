@@ -36,7 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import controller.CollectConditionCtrl;
-import controller.CrawStockFromXueQiu;
+import controller.CrawStockXueQiu;
 import controller.CrawStocks;
 import controller.CrawStocksTongHuaShun;
 import controller.SQLdb;
@@ -170,7 +170,7 @@ public class MainFrame {
 		}
 		
 		CrawStocksTongHuaShun ths = new CrawStocksTongHuaShun();
-		CrawStockFromXueQiu xueqiu = new CrawStockFromXueQiu();
+		CrawStockXueQiu xueqiu = new CrawStockXueQiu();
 		
 		sqldbs.add(new SQLdb(ths));
 		sqldbs.add(new SQLdb(xueqiu));
@@ -368,6 +368,9 @@ public class MainFrame {
 				// TODO Auto-generated method stub
 				int index = combo.getSelectionIndex();
 				sqldb = sqldbs.get(index);
+//				String text = lblResultCount.getText();
+//				text = text.replaceAll("\\(.*?\\)", "(" + sqldb.getSourceName() + ")");
+//				lblResultCount.setText(text);
 				try {
 					setExtreValue();
 				} catch (SQLException e) {
@@ -529,8 +532,7 @@ public class MainFrame {
 
 	public void createCollectionHeadCom() {
 		colHeadComposite = new Composite(collectComposite, SWT.NONE);
-		colHeadComposite.setBackground(SWTResourceManager
-				.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
+		colHeadComposite.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_LIGHT_SHADOW));
 		colHeadComposite.setBounds(0, 0, 321, 30);
 
 		lblCollect = new CLabel(colHeadComposite, SWT.SHADOW_NONE);
@@ -552,7 +554,7 @@ public class MainFrame {
 		fd_lblResultCount.top = new FormAttachment(optionComposite, 0, SWT.TOP);
 		fd_lblResultCount.left = new FormAttachment(optionComposite, 6);
 		lblResultCount.setLayoutData(fd_lblResultCount);
-		lblResultCount.setText("共有 0 股符合条件");
+		lblResultCount.setText("共有 0 股符合条件 (" + sqldb.getSourceName() + ")");
 		
 		stockListComposite = new Composite(topComposite, SWT.NONE);
 		FormData fd_stockListComposite = new FormData();
@@ -641,8 +643,8 @@ public class MainFrame {
 			tableItem.setText(text);
 		}
 		rs.close();
-		
-		lblResultCount.setText("共有 " + (index-1) + " 股符合条件");
+		lblResultCount.setText("共有 " + (index-1) + " 股符合条件 (" 
+		+ sqldb.getSourceName() + ")");
 	}
 
 	// 开始搜索按钮

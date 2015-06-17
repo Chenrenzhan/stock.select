@@ -28,7 +28,7 @@ public class SQLdb {
 	private JSONArray stockArray;
 	
 	private String tableName;
-	
+	private String sourceName;
 	//数据来源列表
 //	private ArrayList<CrawStocks> dataList;
 	
@@ -39,6 +39,7 @@ public class SQLdb {
 		this.crawStocks = crawStocks;
 		
 		this.tableName = crawStocks.getTableName();
+		this.sourceName = crawStocks.getSourceName();
 		
 		createdbTable();
 	}
@@ -257,10 +258,14 @@ public class SQLdb {
 		return stockArray;
 	}
 
+	public String getSourceName() {
+		return sourceName;
+	}
+
 	public static void main(String[] argv) 
 			throws ClientProtocolException, IOException, SQLException{
 //		CrawStocksTongHuaShun ths = new CrawStocksTongHuaShun();
-		CrawStockFromXueQiu xq = new CrawStockFromXueQiu();
+		CrawStockXueQiu xq = new CrawStockXueQiu();
 		System.out.println("xueqiu");
 //		SQLdb thsSql = new SQLdb(ths);
 //		thsSql.update();
