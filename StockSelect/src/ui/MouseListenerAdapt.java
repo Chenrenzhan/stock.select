@@ -3,7 +3,8 @@ package ui;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 
-public abstract class MouseListenerAdapt implements MouseListener {
+public abstract class MouseListenerAdapt 
+	implements MouseListener, Adapter {
 
 	@Override
 	public void mouseDoubleClick(MouseEvent arg0) {
