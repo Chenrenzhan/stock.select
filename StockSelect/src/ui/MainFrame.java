@@ -91,6 +91,8 @@ public class MainFrame {
 	private CLabel lblResetCondition;
 	private CLabel lblStartReseach;
 
+	private CompositeMove compositeMove;
+	
 	private Composite collectComposite;
 	private Composite colHeadComposite;
 	private Composite collectionComposite;
@@ -255,27 +257,28 @@ public class MainFrame {
 	//设置按下鼠标可移动窗口
 	public void CompositeMove(){
 //		setCompositeMove(shell);
-		setCompositeMove(topComposite);
-		setCompositeMove(optionComposite);
-		setCompositeMove(selectComposite);
-		setCompositeMove(conditionTable);
-		setCompositeMove(collectComposite);
-		setCompositeMove(stockListComposite);
-		setCompositeMove(stockListTable);
-		setCompositeMove(lblSelect);
-		setCompositeMove(lblCollect);
-		setCompositeMove(lblResultCount);
-		setCompositeMove(collectionComposite);
-		setCompositeMove(selectHeadComposite);
-		setCompositeMove(colHeadComposite);
+		compositeMove = new CompositeMove(shell);
+		compositeMove.add(topComposite);
+		compositeMove.add(optionComposite);
+		compositeMove.add(selectComposite);
+		compositeMove.add(conditionTable);
+		compositeMove.add(collectComposite);
+		compositeMove.add(stockListComposite);
+		compositeMove.add(stockListTable);
+		compositeMove.add(lblSelect);
+		compositeMove.add(lblCollect);
+		compositeMove.add(lblResultCount);
+		compositeMove.add(collectionComposite);
+		compositeMove.add(selectHeadComposite);
+		compositeMove.add(colHeadComposite);
 		
 	}
 	
-	public void setCompositeMove(Composite composite){
-		CompositeMoveListener listener = new CompositeMoveListener(shell);
-		composite.addListener(SWT.MouseDown, listener);
-		composite.addListener(SWT.MouseMove, listener);
-	}
+//	public void setCompositeMove(Composite composite){
+//		CompositeMoveListener listener = new CompositeMoveListener(shell);
+//		composite.addListener(SWT.MouseDown, listener);
+//		composite.addListener(SWT.MouseMove, listener);
+//	}
 	
 	/**
 	 * Create contents of the window.
