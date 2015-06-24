@@ -38,8 +38,9 @@ import org.json.JSONObject;
 import controller.CollectConditionCtrl;
 import controller.CrawStockXueQiu;
 import controller.CrawStocks;
-import controller.CrawStocksTongHuaShun;
+import controller.CrawStockTongHuaShun;
 import controller.SQLdb;
+import controller.StockSourceFactory;
 
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Combo;
@@ -113,6 +114,8 @@ public class MainFrame {
 	private ArrayList<Condition> conditionValue;
 	
 	private ArrayList<CollectCondition> collCompArray;
+	
+	private StockSourceFactory sourceFactory;
 
 	/**
 	 * Launch the application.
@@ -140,7 +143,12 @@ public class MainFrame {
 		//创建开始界面
 		Shell startShell = new StartShell(Display.getDefault());
 		startShell.open();
-		initSql();
+		try {
+			initSql();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (sqldb.getCount() == 0) {
 			sqldb.update();
 		}
@@ -161,7 +169,7 @@ public class MainFrame {
 		}
 	}
 	
-	public void initSql(){
+	public void initSql() throws Exception{
 		if(sqldbs == null){
 			sqldbs = new ArrayList<SQLdb>();
 		}
@@ -169,8 +177,10 @@ public class MainFrame {
 			sourceNames = new ArrayList<String>();
 		}
 		
-		CrawStocksTongHuaShun ths = new CrawStocksTongHuaShun();
-		CrawStockXueQiu xueqiu = new CrawStockXueQiu();
+		sourceFactory = new StockSourceFactory();
+		
+		CrawStocks ths = sourceFactory.make(1);
+		CrawStocks xueqiu = sourceFactory.make(2);
 		
 		sqldbs.add(new SQLdb(ths));
 		sqldbs.add(new SQLdb(xueqiu));
