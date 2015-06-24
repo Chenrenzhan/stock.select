@@ -39,7 +39,7 @@ public class CrawStockXueQiu extends CrawStocks {
 
 	private static final String URL = "http://xueqiu.com/stock/screener/screen.json"
 			+ "?category=SH&exchange=&areacode=&indcode=&orderby=symbol&order=desc"
-			+ "&size=300&page=2&current=ALL&pettm=ALL&pelyr=ALL&pb=ALL&pct=All";
+			+ "&current=ALL&pettm=ALL&pelyr=ALL&pb=ALL&pct=ALL&size=300";
 	private static final String GET_COOKIE_URL = "http://xueqiu.com/hq/screener";
 
 	private String[] urlList;
@@ -72,9 +72,9 @@ public class CrawStockXueQiu extends CrawStocks {
 
 	@Override
 	public void execute() {
-		if(urlList == null){
+//		if(urlList == null){
 			urlList = getUrlList();
-		}
+//		}
 		
 		if(subDataString == null){
 			subDataString = new ArrayList<String>();
@@ -94,7 +94,6 @@ public class CrawStockXueQiu extends CrawStocks {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				
 				execute();
 				
 				for(GetThread gThread : threads){
@@ -152,7 +151,9 @@ public class CrawStockXueQiu extends CrawStocks {
 		String[] arrStr = new String[10];
 		for (int i = 0; i < 10; ++i) {
 			arrStr[i] = URL + "&page=" + (i + 1);
+			System.out.println(arrStr[i]);
 		}
+		System.out.println(arrStr);
 		return arrStr;
 	}
 	
@@ -200,6 +201,7 @@ public class CrawStockXueQiu extends CrawStocks {
 			if (entity != null) {
 
 				String str = InputStream2String(entity, "utf-8");
+//				System.out.println(str);
 				subDataString.add(extractValidValue(str));
 			}
 			// ensure the connection gets released to the manager

@@ -13,15 +13,17 @@ import org.junit.Test;
 
 import controller.CrawStockXueQiu;
 import controller.CrawStocks;
-import controller.CrawStocksTongHuaShun;
+import controller.CrawStockTongHuaShun;
+import controller.StockSourceFactory;
 
 public class XueQiudbTest extends SqldbTest {
 
-	
+	private static StockSourceFactory sourceFactory;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		CrawStocks xueqiu = new CrawStockXueQiu();
+		sourceFactory = new StockSourceFactory();
+		CrawStocks xueqiu = sourceFactory.make(2);
 		SqldbTest.BeforeClass(xueqiu);
 	}
 

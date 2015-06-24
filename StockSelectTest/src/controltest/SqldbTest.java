@@ -13,7 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import controller.CrawStocks;
-import controller.CrawStocksTongHuaShun;
+import controller.CrawStockTongHuaShun;
 import controller.SQLdb;
 
 abstract public class SqldbTest {
@@ -28,7 +28,7 @@ abstract public class SqldbTest {
 	public static void BeforeClass(CrawStocks crawStocks) 
 			throws Exception {
 		
-		sqldb = new SQLdb(new CrawStocksTongHuaShun());
+		sqldb = new SQLdb(new CrawStockTongHuaShun());
 		sqldb.execute();
 //		sqldb.createdbTable();
 //		System.out.println(sqldb.getCount());

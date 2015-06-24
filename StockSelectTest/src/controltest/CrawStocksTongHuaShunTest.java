@@ -20,22 +20,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ui.StockListTable;
-import controller.CrawStocksTongHuaShun;
+import controller.CrawStockTongHuaShun;
+import controller.StockSourceFactory;
 
-public class CrawStocksTest {
+public class CrawStocksTongHuaShunTest {
 
-	private static String ajaxStr;
+	private static String str;
+	static CrawStockTongHuaShun ths;
+	private static StockSourceFactory sourceFactory;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		try {
-			ajaxStr = CrawStocksTongHuaShun.ajaxResquest(CrawStocksTongHuaShun.URL_BASE_AJAX, 
-					CrawStocksTongHuaShun.getToken(CrawStocksTongHuaShun.GET_PARAM_URL, 
-							CrawStocksTongHuaShun.CHARSET));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sourceFactory = new StockSourceFactory();
+		ths = (CrawStockTongHuaShun) sourceFactory.make(1);
+		ths.update();
+		str = ths.getDataArray().toString();
 	}
 
 	@AfterClass
@@ -46,7 +45,7 @@ public class CrawStocksTest {
 	//测试抓取回来的字符串是否为空
 	public void testStringEmpty(){
 //		System.out.println(ajaxStr);
-		assertThat("", not(ajaxStr));
+		assertThat("", not(str));
 	}
 	
 //	@Test
@@ -60,7 +59,7 @@ public class CrawStocksTest {
 	//测试抓取回来的数据的类型
 	public void testClassType() {
 
-		JSONArray stocksArray_json = CrawStocksTongHuaShun.getStocksArray(ajaxStr);
+		JSONArray stocksArray_json = ths.getDataArray();
 		
 		assertThat(stocksArray_json, instanceOf(stocksArray_json.getClass()));
 	}
@@ -71,7 +70,7 @@ public class CrawStocksTest {
 	//测试抓取回来的数据
 	public void testResult() {
 
-		JSONArray stocksArray_json = CrawStocksTongHuaShun.getStocksArray(ajaxStr);
+		JSONArray stocksArray_json = ths.getDataArray();
 		int stocksSum = stocksArray_json.length();
 		//断言获取股票的数量要大于2000
 		assertThat(stocksSum, greaterThan(2000));

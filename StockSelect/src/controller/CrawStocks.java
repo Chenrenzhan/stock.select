@@ -83,7 +83,9 @@ public abstract class CrawStocks {
         String line = "";
         while((line = buff.readLine()) != null){
             res.append(line);
+//            System.out.println(line);
         }
+//        System.out.println(res.toString());
         return res.toString();
     }
     
